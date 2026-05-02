@@ -6,6 +6,30 @@ This is a beta release. Interfaces, defaults, packaging, and outputs may change 
 
 The public repository contains source code, documentation, scripts, templates, and small synthetic examples only. Real occurrence data, downloaded rasters, generated outputs, API keys, screenshots, and release archives should stay local.
 
+
+## Current Status
+
+Implemented and tested in the current beta:
+
+- GLM presence/background workflow for presence-only occurrence records.
+- Experimental GAM, Rangebagging, and GLM + Rangebagging ensemble backends behind the model registry.
+- Occurrence cleaning, duplicate removal, source summaries, and synthetic example data.
+- Selected WorldClim BIO covariates with optional local download/cache.
+- Optional OpenTopography elevation covariate.
+- Optional local HWSD v2 soil covariate.
+- Exportable suitability GeoTIFF, PNG preview, cleaned occurrence table, and summary report.
+- Windows launcher, command-line pipeline, Docker scaffold, smoke tests, release audit, and testthat checks.
+
+Planned or experimental ideas from Jacob/Rando's spike, not integrated unless a later release explicitly says so:
+
+- Dark mode UI.
+- SoilGrids helper/download flow.
+- CMIP6 future climate projections, multi-GCM averaging, and delta maps.
+- Boundary/mask UI and spatial thinning.
+- Additional model backends such as MaxEnt/maxnet, Random Forest, BRT/GBM, BART, NSDM, JSDM, or hybrid/mechanistic models.
+
+Do not treat planned/experimental items as available until they have UI support, tests, and documentation.
+
 ## Features
 
 - Shiny dashboard for occurrence CSV/TSV uploads or a bundled synthetic example dataset.

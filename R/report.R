@@ -26,6 +26,11 @@ write_summary_report <- function(result, path) {
   }
 
   covariates <- if (!is.null(result$environment$names)) result$environment$names else character()
+  model_method <- if (!is.null(result$model_info$method) && nzchar(result$model_info$method)) {
+    result$model_info$method
+  } else {
+    "Fast presence/background GLM with balanced class weights"
+  }
   auc_text <- if (finite_one(result$metrics$auc_mean)) {
     paste0(sprintf("%.3f", result$metrics$auc_mean),
            if (finite_one(result$metrics$auc_sd)) paste0(" +/- ", sprintf("%.3f", result$metrics$auc_sd)) else "")
@@ -37,6 +42,10 @@ write_summary_report <- function(result, path) {
   } else {
     "not available"
   }
+  extra_output_lines <- character()
+  if (!is.null(result$paths$disagreement_tif)) extra_output_lines <- c(extra_output_lines, paste0("- Model disagreement GeoTIFF: ", fmt_chr(result$paths$disagreement_tif)))
+  if (!is.null(result$paths$glm_tif)) extra_output_lines <- c(extra_output_lines, paste0("- GLM component GeoTIFF: ", fmt_chr(result$paths$glm_tif)))
+  if (!is.null(result$paths$rangebag_tif)) extra_output_lines <- c(extra_output_lines, paste0("- Rangebag component GeoTIFF: ", fmt_chr(result$paths$rangebag_tif)))
   lines <- c(
     paste0("Species Distribution Model Report: ", fmt_chr(result$config$species, "Species")),
     paste0("Generated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
@@ -56,7 +65,7 @@ write_summary_report <- function(result, path) {
     paste0("- Removed invalid coordinates: ", fmt_num(result$cleaning$removed_bad_coordinates)),
     paste0("- Removed duplicate records: ", fmt_num(result$cleaning$removed_duplicates)),
     "", "Model",
-    "- Method: Fast presence/background GLM with balanced class weights",
+    paste0("- Method: ", model_method),
     "- Background sampling: complete covariate cells; presence-cell overlap excluded where raster cells are available",
     paste0("- Observation records used: ", fmt_num(result$metrics$presence_records)),
     paste0("- Background points used: ", fmt_num(result$metrics$background_points)),
@@ -72,7 +81,8 @@ write_summary_report <- function(result, path) {
     paste0("- Estimated high-suitability area (km2): ", fmt_num(result$summary$high_risk_area_km2)),
     "", "Outputs",
     paste0("- Suitability GeoTIFF: ", fmt_chr(result$paths$tif)),
-    paste0("- Suitability PNG: ", fmt_chr(result$paths$png))
+    paste0("- Suitability PNG: ", fmt_chr(result$paths$png)),
+    extra_output_lines
   )
   writeLines(lines, con = path)
   invisible(path)

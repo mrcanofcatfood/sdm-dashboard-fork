@@ -16,6 +16,11 @@ sdm_default_aggregation_factor <- 1L
 sdm_default_cv_folds <- 3L
 sdm_default_worldclim_res <- 10
 sdm_default_seed <- 42L
+sdm_default_model_id <- "glm"
+sdm_default_rangebag_n_bags <- 100L
+sdm_default_rangebag_fraction <- 0.5
+sdm_default_rangebag_vars_per_bag <- 1L
+sdm_default_ensemble_weighting <- "auc"
 sdm_default_elevation_demtype <- "COP90"
 sdm_default_soil_vars <- c("BULK_DENSITY", "DRAINAGE", "ROOT_DEPTH", "AWC")
 

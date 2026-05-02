@@ -38,6 +38,23 @@ covariates/
 *.gri
 *.vrt
 *.ovr
+Australia Boundary/
+Australia_Boundary/
+boundaries/
+Boundaries/
+masks/
+Masks/
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.sbn
+*.sbx
+*.qix
+*.gpkg
+*.kml
+*.kmz
 screenshots/
 Screenshots/
 *_screenshot*.png

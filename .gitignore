@@ -49,6 +49,25 @@ covariates/opentopo/
 *.vrt
 *.ovr
 
+# Local study boundaries and masks (often private or bulky)
+Australia Boundary/
+Australia_Boundary/
+boundaries/
+Boundaries/
+masks/
+Masks/
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.sbn
+*.sbx
+*.qix
+*.gpkg
+*.kml
+*.kmz
+
 # Screenshots can expose local paths, coordinates, or unpublished results
 screenshots/
 Screenshots/

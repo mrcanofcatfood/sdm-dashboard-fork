@@ -104,6 +104,8 @@ ui <- fluidPage(
       tags$details(class = "control-section",
         tags$summary("Model settings"),
         div(class = "details-body",
+          selectInput("model_id", "Model backend", choices = sdm_model_choices(), selected = sdm_default_model_id),
+          div(class = "small-muted", "Rangebagging is experimental; GLM remains the stable default."),
           numericInput("background_n", "Background points", value = sdm_default_background_n, min = 500, max = 100000, step = 500),
           numericInput("min_source_records", "Merge sources with fewer than", value = sdm_default_min_source_records, min = 1, max = 100, step = 1),
           checkboxInput("thin_by_cell", "Thin duplicate records in the same climate cell", value = TRUE),
@@ -133,7 +135,7 @@ ui <- fluidPage(
         tabPanel("Dashboard", br(), fluidRow(column(8, div(class = "content-card", plotOutput("suitability_plot", height = "52vh"))), column(4, div(class = "content-card", h4("Projection summary"), uiOutput("summary_panel"))))),
         tabPanel("Observation records", br(), fluidRow(column(7, div(class = "content-card", plotOutput("occurrence_plot", height = "50vh"))), column(5, div(class = "content-card", h4("Top observation sources"), tableOutput("source_table"))))),
         tabPanel("Model diagnostics", br(), fluidRow(column(7, div(class = "content-card", h4("Coefficient summary"), tableOutput("coef_table"))), column(5, div(class = "content-card", h4("Run log"), p(class = "small-muted", "Warnings and progress messages from the latest run."), verbatimTextOutput("run_log"))))),
-        tabPanel("Downloads", br(), div(class = "content-card", h4("Export results"), p("Downloads are enabled after a successful run."), div(class = "downloads-row", downloadButton("download_tif", "Download GeoTIFF"), downloadButton("download_png", "Download PNG map"), downloadButton("download_occ", "Download cleaned observation records"), downloadButton("download_report", "Download text report"))))
+        tabPanel("Downloads", br(), div(class = "content-card", h4("Export results"), p("Downloads are enabled after a successful run."), div(class = "downloads-row", downloadButton("download_tif", "Download GeoTIFF"), downloadButton("download_png", "Download PNG map"), downloadButton("download_occ", "Download cleaned observation records"), downloadButton("download_report", "Download text report"), downloadButton("download_sidecars", "Download sidecar rasters")), uiOutput("sidecar_download_note")))
       )
     )
   )
@@ -346,7 +348,8 @@ server <- function(input, output, session) {
             species = species_label, occurrence_file = occurrence_file, worldclim_dir = input$worldclim_dir,
             selected_biovars = as.integer(input$biovars), projection_extent = projection_extent,
             background_n = input$background_n, min_source_records = input$min_source_records,
-            merge_small_sources = TRUE, thin_by_cell = isTRUE(input$thin_by_cell), include_quadratic = isTRUE(input$quadratic),
+            merge_small_sources = TRUE, thin_by_cell = isTRUE(input$thin_by_cell), model_id = input$model_id,
+            include_quadratic = isTRUE(input$quadratic),
             threshold = input$threshold, aggregation_factor = input$aggregation_factor, cv_folds = as.integer(input$cv_folds),
             n_cores = input$n_cores, allow_download = isTRUE(input$download_worldclim), worldclim_res = as.numeric(input$worldclim_res),
             use_elevation = isTRUE(input$use_elevation), elevation_demtype = input$elevation_demtype,
@@ -367,7 +370,7 @@ server <- function(input, output, session) {
   output$metric_cards <- renderUI({
     r <- rv$result
     if (is.null(r)) return(div(class = "metric-grid", metric_card("Observation records", "-", "waiting for run"), metric_card("Covariates", "-", "waiting for run"), metric_card("AUC", "-", "cross-validation"), metric_card("High-suitability area", "-", "km2 above threshold")))
-    div(class = "metric-grid", metric_card("Observation records used", fmt_num(r$metrics$presence_records), "after cleaning/thinning"), metric_card("Covariates", fmt_num(length(r$environment$names)), "climate/elevation/soil"), metric_card("CV AUC", fmt_num(r$metrics$auc_mean, 3), paste0(r$metrics$cv_folds, " folds; ", r$metrics$n_cores, " cores")), metric_card("High-suitability area", fmt_num(r$summary$high_risk_area_km2), "km2 above threshold"))
+    div(class = "metric-grid", metric_card("Observation records used", fmt_num(r$metrics$presence_records), "after cleaning/thinning"), metric_card("Model", r$config$model_label %||% "GLM", "backend"), metric_card("CV AUC", fmt_num(r$metrics$auc_mean, 3), paste0(r$metrics$cv_folds, " folds; ", r$metrics$n_cores, " cores")), metric_card("High-suitability area", fmt_num(r$summary$high_risk_area_km2), "km2 above threshold"))
   })
 
   output$suitability_plot <- renderPlot({ if (is.null(rv$result)) return(placeholder_plot("No suitability map yet.")); r <- rv$result; plot_suitability_map(r$suitability, r$occurrence, r$config$projection_extent, r$config$species, r$config$threshold, TRUE) })
@@ -377,6 +380,7 @@ server <- function(input, output, session) {
     if (is.null(r)) return(div(class = "small-muted", "No model has been run yet."))
     row <- function(label, value) div(class = "summary-row", div(class = "summary-label", label), div(class = "summary-value", value))
     div(class = "summary-list",
+      row("Model backend", r$config$model_label %||% "GLM"),
       row("Mean suitability", fmt_num(r$summary$mean, 3)),
       row("Median suitability", fmt_num(r$summary$median, 3)),
       row("Maximum suitability", fmt_num(r$summary$max, 3)),
@@ -391,13 +395,43 @@ server <- function(input, output, session) {
     )
   })
   output$source_table <- renderTable({ r <- rv$result; if (is.null(r)) return(data.frame(Message = "Run the model to view observation source counts.")); head(data.frame(Source = names(r$source_counts), Records = as.integer(r$source_counts), row.names = NULL), 25) }, striped = TRUE, hover = TRUE, spacing = "s")
-  output$coef_table <- renderTable({ r <- rv$result; if (is.null(r)) return(data.frame(Message = "Run the model to view coefficients.")); co <- r$coefficients; numeric_cols <- vapply(co, is.numeric, logical(1)); co[numeric_cols] <- lapply(co[numeric_cols], function(x) signif(x, 4)); co }, striped = TRUE, hover = TRUE, spacing = "s")
+  output$coef_table <- renderTable({
+    r <- rv$result
+    if (is.null(r)) return(data.frame(Message = "Run the model to view diagnostics."))
+    co <- r$coefficients
+    if (is.null(co) || length(co) == 0) return(data.frame(Message = paste(r$config$model_label %||% "This backend", "does not produce GLM-style coefficients.")))
+    co <- as.data.frame(co)
+    numeric_cols <- vapply(co, is.numeric, logical(1))
+    co[numeric_cols] <- lapply(co[numeric_cols], function(x) signif(x, 4))
+    co
+  }, striped = TRUE, hover = TRUE, spacing = "s")
   output$run_log <- renderText(rv$log)
+  output$sidecar_download_note <- renderUI({
+    r <- rv$result
+    if (is.null(r)) return(NULL)
+    sidecars <- unlist(r$paths[c("glm_tif", "rangebag_tif", "disagreement_tif")], use.names = FALSE)
+    sidecars <- sidecars[!is.na(sidecars) & nzchar(sidecars) & file.exists(sidecars)]
+    if (length(sidecars) == 0) return(p(class = "small-muted", "No model sidecar rasters were produced for this run."))
+    tags$ul(class = "small-muted", lapply(sidecars, function(path) tags$li(basename(path))))
+  })
 
   output$download_tif <- downloadHandler(filename = function() { req(rv$result); basename(rv$result$paths$tif) }, content = function(file) { req(rv$result, file.exists(rv$result$paths$tif)); file.copy(rv$result$paths$tif, file, overwrite = TRUE) })
   output$download_png <- downloadHandler(filename = function() { req(rv$result); basename(rv$result$paths$png) }, content = function(file) { req(rv$result, file.exists(rv$result$paths$png)); file.copy(rv$result$paths$png, file, overwrite = TRUE) })
   output$download_occ <- downloadHandler(filename = function() { req(rv$result); paste0(safe_slug(rv$result$config$species), "_cleaned_occurrences.csv") }, content = function(file) { req(rv$result); utils::write.csv(rv$result$occurrence, file, row.names = FALSE) })
   output$download_report <- downloadHandler(filename = function() { req(rv$result); paste0(safe_slug(rv$result$config$species), "_sdm_report.txt") }, content = function(file) { req(rv$result); write_summary_report(rv$result, file) })
+  output$download_sidecars <- downloadHandler(
+    filename = function() { req(rv$result); paste0(safe_slug(rv$result$config$species), "_model_sidecars.zip") },
+    content = function(file) {
+      req(rv$result)
+      sidecars <- unlist(rv$result$paths[c("glm_tif", "rangebag_tif", "disagreement_tif")], use.names = FALSE)
+      sidecars <- sidecars[!is.na(sidecars) & nzchar(sidecars) & file.exists(sidecars)]
+      validate(need(length(sidecars) > 0, "No sidecar rasters are available for this run."))
+      oldwd <- getwd()
+      on.exit(setwd(oldwd), add = TRUE)
+      setwd(dirname(sidecars[1]))
+      utils::zip(file, files = basename(sidecars))
+    }
+  )
 }
 
 if (sys.nframe() == 0) {

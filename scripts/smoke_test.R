@@ -19,7 +19,8 @@ required_functions <- c(
   "opentopo_globaldem_url", "load_soil_covariate", "plot_suitability_map",
   "write_summary_report", "detect_available_cores", "validate_extent",
   "normalize_threshold", "safe_slug", "detect_column", "read_occurrence_file", "infer_species_label",
-  "clean_occurrences", "make_training_extent", "make_sdm_formula"
+  "clean_occurrences", "make_training_extent", "make_sdm_formula",
+  "sdm_model_choices", "validate_sdm_model_id", "get_sdm_model", "fit_sdm_model", "predict_sdm_model"
 )
 missing <- required_functions[!vapply(required_functions, exists, logical(1), mode = "function")]
 if (length(missing) > 0) {
@@ -31,6 +32,9 @@ if (!identical(normalize_threshold(sdm_default_threshold), 0.5)) stop("Default t
 if (!identical(validate_biovars(sdm_default_biovars), unique(as.integer(sdm_default_biovars)))) stop("Default BIO variables failed validation.", call. = FALSE)
 if (!identical(safe_slug("Demo species / test"), "demo_species_test")) stop("Slug helper failed.", call. = FALSE)
 if (!identical(sdm_default_extent_preset, "occurrence")) stop("The app should default to occurrence extent.", call. = FALSE)
+if (!identical(validate_sdm_model_id(NULL), sdm_default_model_id)) stop("Default model validation failed.", call. = FALSE)
+if (!identical(validate_sdm_model_id("glm"), "glm")) stop("GLM model validation failed.", call. = FALSE)
+if (!"glm" %in% unname(sdm_model_choices())) stop("GLM backend missing from model registry.", call. = FALSE)
 
 formula <- make_sdm_formula(c("bio1", "bio12", "elevation_m"), include_quadratic = TRUE)
 if (!inherits(formula, "formula")) stop("Formula helper failed.", call. = FALSE)

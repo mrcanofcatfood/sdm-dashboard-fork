@@ -26,8 +26,14 @@ missing <- expected[!file.exists(expected)]
 if (length(missing) > 0) fail("Missing expected release file(s): ", paste(missing, collapse = ", "))
 
 removed_public_clutter <- c("AGENTS.md", "Main.R", "prepare_windows.bat", "docs/index.md")
-present_clutter <- removed_public_clutter[file.exists(removed_public_clutter)]
-if (length(present_clutter) > 0) fail("Public clutter file(s) should not be tracked/present: ", paste(present_clutter, collapse = ", "))
+tracked_public_clutter <- tryCatch(
+  system2("git", c("-C", project_root, "ls-files", "--", removed_public_clutter), stdout = TRUE, stderr = FALSE),
+  error = function(e) character()
+)
+tracked_public_clutter <- tracked_public_clutter[nzchar(tracked_public_clutter)]
+if (length(tracked_public_clutter) > 0) {
+  fail("Public clutter file(s) should not be tracked: ", paste(tracked_public_clutter, collapse = ", "))
+}
 
 make_release_env <- new.env(parent = .GlobalEnv)
 source("scripts/make_release_zip.R", local = make_release_env)

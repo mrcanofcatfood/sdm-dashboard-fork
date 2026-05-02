@@ -21,8 +21,7 @@ plot_suitability_map <- function(suitability, occ = NULL, projection_extent = NU
   graphics::par(mar = c(3.9, 4.3, 4.5, 5.5), bg = "#EEF5F8", fg = "#263238")
   terra::plot(suitability_plot, col = cols, range = c(0, 1), main = "", axes = TRUE,
               colNA = "#F6F4EF", xlab = "Longitude", ylab = "Latitude",
-              plg = list(title = "Suitability", title.cex = 0.88, cex = 0.78,
-                         shrink = 0.82, mar = 3.4), box = FALSE)
+              plg = list(title = "Suitability", title.cex = 0.88, cex = 0.78), box = FALSE)
   graphics::grid(col = grDevices::adjustcolor("#FFFFFF", 0.42), lwd = 0.7)
   graphics::title(main = paste0(species, " suitability"), line = 2.2, cex.main = 1.08, font.main = 2)
   graphics::mtext(sprintf("Predicted suitability (0-1); reporting threshold %.2f", threshold),

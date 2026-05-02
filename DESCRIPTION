@@ -15,4 +15,5 @@ Imports:
     shiny,
     terra
 Suggests:
+    mgcv,
     testthat
