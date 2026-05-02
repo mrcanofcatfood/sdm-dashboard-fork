@@ -59,9 +59,14 @@ occurrence_extent_overlap <- function(occ, extent) {
 }
 
 placeholder_plot <- function(message) {
-  plot.new()
-  text(0.5, 0.55, message, cex = 1.1, col = "grey35")
-  text(0.5, 0.46, "Configure options on the left, then click Run SDM.", cex = 0.9, col = "grey55")
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(bg = "#07111D", mar = c(0, 0, 0, 0))
+  graphics::plot.new()
+  graphics::rect(0, 0, 1, 1, col = "#07111D", border = NA)
+  graphics::rect(0.04, 0.08, 0.96, 0.92, border = grDevices::adjustcolor("#4ADECB", 0.22), lwd = 1.2)
+  graphics::text(0.5, 0.56, message, cex = 1.08, col = "#D8E7F3", font = 2)
+  graphics::text(0.5, 0.46, "Configure options on the left, then click Run SDM.", cex = 0.86, col = "#8EA2B5")
 }
 
 opentopo_key_is_configured <- function() nzchar(Sys.getenv("OPENTOPOGRAPHY_API_KEY", unset = ""))

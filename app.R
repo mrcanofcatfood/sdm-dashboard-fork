@@ -44,6 +44,8 @@ options(shiny.maxRequestSize = 300 * 1024^2)
 
 sdm_initial_occurrence_file <- if (file.exists(sdm_default_occurrence_file)) sdm_default_occurrence_file else if (file.exists(sdm_demo_occurrence_file)) sdm_demo_occurrence_file else NA_character_
 sdm_initial_species <- default_species_label(sdm_initial_occurrence_file)
+sdm_theme_css_file <- file.path(app_dir, "www", "sdm-theme.css")
+sdm_theme_css <- if (file.exists(sdm_theme_css_file)) paste(readLines(sdm_theme_css_file, warn = FALSE), collapse = "\n") else ""
 
 ui <- fluidPage(
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly", primary = "#0B6E69"),
@@ -56,14 +58,14 @@ ui <- fluidPage(
 
   tags$style(HTML("\n    .status-ok,.status-warn,.status-error,.status-info { overflow-wrap:anywhere; }\n    .status-ok:focus,.status-warn:focus,.status-error:focus,.status-info:focus,\n    .btn:focus-visible,.form-control:focus,.form-select:focus,input[type='radio']:focus-visible,input[type='checkbox']:focus-visible,summary:focus-visible { outline:3px solid #4cc9b0; outline-offset:2px; box-shadow:0 0 0 .2rem rgba(76,201,176,.25); }\n    @media (max-width: 991px) {\n      .control-panel { position:static; height:auto; max-height:none; margin-bottom:12px; }\n      .control-scroll { overflow:visible; }\n      .run-button-wrap { position:sticky; bottom:0; z-index:10; padding-bottom:8px; }\n      .metric-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }\n      .main-panel .content-card { overflow-x:auto; }\n    }\n    @media (max-width: 575px) {\n      .hero { padding:14px; }\n      .metric-grid,.summary-row { grid-template-columns:1fr; }\n      .metric-value { font-size:1.3rem; }\n      .content-card { padding:12px; }\n    }\n  ")),
 
-  tags$link(rel = "stylesheet", href = "sdm-theme.css"),
+  tags$style(HTML(sdm_theme_css)),
 
   div(class = "hero",
     div(class = "hero-kicker", "Experimental multi-model SDM workbench"),
     h1("Species Distribution Model"),
     p("Clean occurrence records, compare model backends, and export habitat suitability maps from one local-first dashboard."),
     div(class = "hero-badges",
-      span("GLM stable"), span("GAM experimental"), span("Rangebagging experimental"), span("Ensemble outputs")
+      span("CSV/data ready"), span("BIO vars configured"), span("GLM ready"), span("Provenance exports")
     )
   ),
 
@@ -152,7 +154,7 @@ ui <- fluidPage(
     mainPanel(width = 9,
       uiOutput("status_banner"), uiOutput("preflight_panel"), uiOutput("metric_cards"),
       tabsetPanel(id = "tabs",
-        tabPanel("Dashboard", br(), fluidRow(column(8, div(class = "content-card", plotOutput("suitability_plot", height = "52vh"))), column(4, div(class = "content-card", h4("Projection summary"), uiOutput("summary_panel"))))),
+        tabPanel("Dashboard", br(), fluidRow(column(8, div(class = "content-card map-card", div(class = "map-title-row", h4("Current suitability"), span("Australia-first map view")), plotOutput("suitability_plot", height = "56vh"))), column(4, div(class = "content-card", h4("Projection summary"), uiOutput("summary_panel"))))),
         tabPanel("Future projection", br(), fluidRow(column(6, div(class = "content-card", h4("Future suitability"), plotOutput("future_plot", height = "48vh"))), column(6, div(class = "content-card", h4("Suitability delta"), plotOutput("delta_plot", height = "48vh"))))),
         tabPanel("Observation records", br(), fluidRow(column(7, div(class = "content-card", plotOutput("occurrence_plot", height = "50vh"))), column(5, div(class = "content-card", h4("Top observation sources"), tableOutput("source_table"))))),
         tabPanel("Model diagnostics", br(), fluidRow(column(7, div(class = "content-card", h4("Coefficient summary"), tableOutput("coef_table"))), column(5, div(class = "content-card", h4("Run log"), p(class = "small-muted", "Warnings and progress messages from the latest run."), verbatimTextOutput("run_log"))))),

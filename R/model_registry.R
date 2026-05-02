@@ -122,7 +122,7 @@ register_sdm_model(
   supports_uncertainty = FALSE,
   supports_future = TRUE,
   diagnostics = list(coefficients = FALSE, cv_auc = TRUE, cv_tss = TRUE),
-  notes = "Experimental backend ported from Jacob/Rando's feature spike; uses dependency-free rectangular range bags."
+  notes = "Experimental backend using dependency-free rectangular range bags."
 )
 
 register_sdm_model(

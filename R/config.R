@@ -8,6 +8,7 @@ sdm_default_future_worldclim_dir <- "Worldclim_future"
 sdm_default_output_dir <- "outputs"
 sdm_default_covariate_cache_dir <- "covariates"
 sdm_default_soil_path <- file.path(sdm_default_covariate_cache_dir, "hwsd_v2", "HWSD_V2_SMU_selected.tif")
+sdm_australia_boundary_path <- file.path("data", "examples", "geo", "australia.geojson")
 
 sdm_default_biovars <- c(1, 4, 6, 12, 15, 18)
 sdm_default_background_n <- 10000L
@@ -30,7 +31,7 @@ sdm_extent_presets <- list(
   aus_north = c(112, 155, -30, -10),
   aus_east = c(140, 155, -38, -10)
 )
-sdm_default_extent_preset <- "occurrence"
+sdm_default_extent_preset <- "aus_full"
 sdm_default_projection_extent <- sdm_extent_presets[[sdm_default_extent_preset]]
 if (is.null(sdm_default_projection_extent)) sdm_default_projection_extent <- sdm_extent_presets$aus_full
 

@@ -1,4 +1,4 @@
-/* Public-demo polish for SDM Dashboard Workbench.
+/* SDM Dashboard Workbench presentation layer.
    Presentation only: model inputs/outputs stay unchanged. */
 :root {
   color-scheme: light dark;
@@ -187,4 +187,124 @@ body.sdm-dark pre {
 @media (max-width: 700px) {
   .hero-badges { display: none; }
   .hero-kicker { font-size: 0.66rem; }
+}
+
+
+/* Default dark workbench skin. */
+body:not(.sdm-light) {
+  background:
+    radial-gradient(circle at 16% 8%, rgba(20, 184, 166, 0.16), transparent 26rem),
+    radial-gradient(circle at 86% 10%, rgba(59, 130, 246, 0.13), transparent 32rem),
+    linear-gradient(180deg, #06101b 0%, #091522 42%, #07111d 100%) !important;
+  color: var(--sdm-text) !important;
+}
+body:not(.sdm-light) .control-panel,
+body:not(.sdm-light) .content-card,
+body:not(.sdm-light) .metric-card {
+  background: rgba(15, 28, 43, 0.92) !important;
+  border-color: #26384d !important;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.34) !important;
+}
+body:not(.sdm-light) .control-section,
+body:not(.sdm-light) .readiness-item {
+  background: rgba(19, 34, 53, 0.86) !important;
+  border-color: #26384d !important;
+}
+body:not(.sdm-light) .control-panel h4,
+body:not(.sdm-light) details.control-section > summary,
+body:not(.sdm-light) .content-card h4,
+body:not(.sdm-light) .summary-value,
+body:not(.sdm-light) .metric-value {
+  color: #f2f7fb !important;
+}
+body:not(.sdm-light) .small-muted,
+body:not(.sdm-light) .metric-label,
+body:not(.sdm-light) .metric-note,
+body:not(.sdm-light) .readiness-detail,
+body:not(.sdm-light) .summary-label,
+body:not(.sdm-light) label,
+body:not(.sdm-light) .form-text,
+body:not(.sdm-light) .help-block {
+  color: #a8b6c7 !important;
+}
+body:not(.sdm-light) .form-control,
+body:not(.sdm-light) .form-select,
+body:not(.sdm-light) input[type='number'],
+body:not(.sdm-light) input[type='text'],
+body:not(.sdm-light) input[type='password'],
+body:not(.sdm-light) select,
+body:not(.sdm-light) textarea,
+body:not(.sdm-light) .selectize-input,
+body:not(.sdm-light) .selectize-control.multi .selectize-input,
+body:not(.sdm-light) .selectize-dropdown {
+  background-color: #0b1726 !important;
+  border-color: #32475f !important;
+  color: #e6eef7 !important;
+}
+body:not(.sdm-light) .selectize-input input,
+body:not(.sdm-light) .selectize-dropdown .option,
+body:not(.sdm-light) .selectize-dropdown .optgroup-header { color: #e6eef7 !important; }
+body:not(.sdm-light) .selectize-dropdown .active { background: #17324c !important; }
+body:not(.sdm-light) .nav-tabs { border-bottom-color: #26384d; }
+body:not(.sdm-light) .nav-tabs .nav-link { color: #a8b6c7; border-color: transparent; }
+body:not(.sdm-light) .nav-tabs .nav-link.active {
+  background: #0f1c2b !important;
+  border-color: #26384d #26384d #0f1c2b !important;
+  color: #f2f7fb !important;
+}
+body:not(.sdm-light) .table,
+body:not(.sdm-light) table { color: #e6eef7 !important; }
+body:not(.sdm-light) .table-striped > tbody > tr:nth-of-type(odd) > * { color: #e6eef7; background-color: rgba(255, 255, 255, 0.035); }
+body:not(.sdm-light) .table-hover > tbody > tr:hover > * { color: #e6eef7; background-color: rgba(55, 208, 178, 0.09); }
+.map-card {
+  background:
+    radial-gradient(circle at 70% 15%, rgba(42, 168, 137, 0.10), transparent 18rem),
+    linear-gradient(180deg, #081320 0%, #07111d 100%) !important;
+  border-color: rgba(74, 222, 203, 0.18) !important;
+}
+.map-card .shiny-plot-output {
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: #07111d;
+}
+.map-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+.map-title-row h4 { margin: 0 !important; }
+.map-title-row span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid rgba(55, 208, 178, 0.28);
+  border-radius: 999px;
+  color: #9eead8;
+  background: rgba(20, 184, 166, 0.10);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.summary-value,
+.readiness-detail,
+.status-ok,
+.status-warn,
+.status-error,
+.status-info {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.summary-row > * {
+  min-width: 0;
+}
+.summary-value {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.content-card {
+  min-width: 0;
 }
