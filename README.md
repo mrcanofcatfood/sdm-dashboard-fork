@@ -19,10 +19,10 @@ Implemented and tested in the current beta:
 - Optional local HWSD v2 soil covariate.
 - Exportable suitability GeoTIFF, PNG preview, cleaned occurrence table, summary report, and sidecar raster bundle when available.
 - Optional model-aware future-climate projection from user-provided future BIO GeoTIFFs, including future suitability and delta rasters.
-- Dark/professional dashboard presentation mode for public demos.
+- Dark/professional dashboard presentation mode with an Australia-first workbench map view.
 - Windows launcher, command-line pipeline, Docker scaffold, smoke tests, release audit, and testthat checks.
 
-Planned or experimental ideas from Jacob/Rando's spike, not integrated unless a later release explicitly says so:
+Planned research extensions, not integrated unless a later release explicitly says so:
 
 - SoilGrids helper/download flow.
 - Automated CMIP6 download/selection and multi-GCM averaging.
@@ -39,7 +39,7 @@ Do not treat planned/experimental items as available until they have UI support,
 - Optional OpenTopography elevation and local HWSD v2 soil covariates.
 - Exportable suitability GeoTIFF, PNG preview, cleaned occurrence table, summary report, and model sidecar raster bundle when available.
 - Optional future-climate projection for matching BIO GeoTIFF scenarios, including suitability-change delta exports.
-- Dark/professional presentation mode for public demos.
+- Dark/professional presentation mode with an Australia-first map view and real Australia boundary overlay.
 - Windows one-click runner, command-line pipeline, Docker scaffold, and lightweight checks for maintainers.
 
 ## Which Download
@@ -51,9 +51,15 @@ Most users should use the latest GitHub Release rather than cloning the reposito
 - The source zip excludes generated outputs, private data, downloaded rasters, and caches.
 - The Windows-ready zip may be larger because it can include the default WorldClim BIO layers for faster first launch.
 
-First public beta release:
+Latest beta release:
 
 - Repository: `https://github.com/5p00kyy/sdm-dashboard`
+- Release tag: `v0.2.0-beta`
+- Source asset: `sdm-dashboard-v0.2.0-beta-source.zip`
+- Windows-ready asset: `sdm-dashboard-v0.2.0-beta-windows-ready.zip`
+
+First public beta release:
+
 - Release tag: `v0.1.0-beta`
 - Windows asset: `sdm-dashboard-v0.1.0-beta-windows-ready.zip`
 - Source asset: `sdm-dashboard-v0.1.0-beta-source.zip`
@@ -151,8 +157,8 @@ Rscript scripts/audit_release.R
 Build release assets with explicit versions:
 
 ```bash
-Rscript scripts/make_release_zip.R source --version=v0.1.0-beta
-Rscript scripts/make_release_zip.R ready --version=v0.1.0-beta
+Rscript scripts/make_release_zip.R source --version=v0.2.0-beta
+Rscript scripts/make_release_zip.R ready --version=v0.2.0-beta
 ```
 
 ## Contributing And Citation

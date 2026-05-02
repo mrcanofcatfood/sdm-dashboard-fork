@@ -1,7 +1,7 @@
 Package: SDMDashboardWorkbench
 Type: Shiny
 Title: Local Species Distribution Modelling Dashboard Workbench
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
     person("SDM Dashboard Workbench contributors", role = c("aut", "cre"))
   )

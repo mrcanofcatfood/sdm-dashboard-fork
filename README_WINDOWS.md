@@ -2,9 +2,7 @@
 
 `Rscript.exe` is included when you install normal R for Windows. It is not downloaded separately.
 
-Use the latest Windows-ready GitHub Release zip when available, for example `sdm-dashboard-v0.1.0-beta-windows-ready.zip`. It may include the default WorldClim cache so first launch is faster. Source downloads are smaller and exclude generated outputs, private occurrence data, and large raster caches.
-
-For future updates, download the newest asset named `sdm-dashboard-vX.Y.Z-windows-ready.zip` or `sdm-dashboard-vX.Y.Z-beta-windows-ready.zip`.
+Use the latest Windows-ready GitHub Release zip. For `v0.2.0-beta`, use `sdm-dashboard-v0.2.0-beta-windows-ready.zip`; it includes the Windows launcher and default BIOCLIM cache for a faster first launch. Source downloads remain available for developers and users who prefer a smaller archive.
 
 ## One-Click Method
 
@@ -86,7 +84,7 @@ http://127.0.0.1:3839
 
 ## Data Files
 
-The app needs occurrence data. Either keep `presence_data.csv` in the project folder, upload a CSV/TSV in the app, or enable the bundled synthetic demo dataset for a quick trial. The demo dataset is artificial, only tests the workflow, and must not be interpreted as a real species distribution.
+The app needs occurrence data. Either keep `presence_data.csv` in the project folder, upload a CSV/TSV in the app, or enable the bundled synthetic demo dataset for a workflow check. The demo dataset is artificial, only tests the workflow, and must not be interpreted as a real species distribution.
 
 Windows-ready release zips may include default WorldClim BIO rasters so first launch is faster. If they are missing, the runner/app can download them when internet is available.
 
