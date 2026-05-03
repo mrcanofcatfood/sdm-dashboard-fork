@@ -125,8 +125,12 @@ ui <- fluidPage(
           numericInput("background_n", "Background points", value = sdm_default_background_n, min = 500, max = 100000, step = 500),
           numericInput("min_source_records", "Merge sources with fewer than", value = sdm_default_min_source_records, min = 1, max = 100, step = 1),
           checkboxInput("thin_by_cell", "Thin duplicate records in the same climate cell", value = TRUE),
+          selectInput("thinning_mode", "Thinning mode", choices = c("Follow legacy checkbox" = "auto", "No thinning" = "none", "Raster cell" = "raster_cell", "Distance" = "distance"), selected = sdm_default_thinning_mode),
+          conditionalPanel("input.thinning_mode == 'distance'", numericInput("thinning_distance_km", "Minimum thinning distance (km)", value = sdm_default_thinning_distance_km, min = 0.1, max = 500, step = 1)),
           checkboxInput("quadratic", "Include quadratic climate responses", value = TRUE),
           selectInput("cv_folds", "Cross-validation", choices = c("Off" = "0", "3-fold" = "3", "5-fold" = "5"), selected = as.character(sdm_default_cv_folds)),
+          selectInput("cv_strategy", "CV strategy", choices = c("Random" = "random", "Spatial blocks" = "spatial_blocks"), selected = sdm_default_cv_strategy),
+          conditionalPanel("input.cv_strategy == 'spatial_blocks'", numericInput("cv_block_size_km", "Spatial block size (km; blank/0 = auto)", value = 0, min = 0, max = 2000, step = 10)),
           numericInput("n_cores", "CPU cores for compile/predict/CV", value = default_cores, min = 1, max = detect_available_cores(TRUE), step = 1),
           div(class = "small-muted", "Also sets MAKEFLAGS=-jN for source package compilation."),
           numericInput("aggregation_factor", "Raster aggregation for speed (1 = native)", value = sdm_default_aggregation_factor, min = 1, max = 8, step = 1)
@@ -296,6 +300,17 @@ server <- function(input, output, session) {
       if (identical(overlap_state, "warn")) warnings <- c(warnings, paste("Projection extent has little or no overlap with the observation records:", overlap_detail))
     }
 
+    thinning_mode <- tryCatch(normalize_thinning_mode(input$thinning_mode %||% sdm_default_thinning_mode, thin_by_cell = isTRUE(input$thin_by_cell)), error = function(e) "raster_cell")
+    thinning_detail <- switch(thinning_mode,
+      none = "Occurrence thinning is off.",
+      distance = paste("Distance thinning at", input$thinning_distance_km %||% sdm_default_thinning_distance_km, "km."),
+      raster_cell = "Duplicate records in the same climate cell will be thinned.",
+      "Occurrence thinning configured."
+    )
+    cv_strategy <- tryCatch(normalize_cv_strategy(input$cv_strategy %||% sdm_default_cv_strategy), error = function(e) "random")
+    cv_detail <- if (identical(cv_strategy, "spatial_blocks")) "Spatial block CV selected for GLM; other experimental backends use their default CV." else "Random CV selected; can be optimistic with spatial autocorrelation."
+    if (identical(cv_strategy, "random")) warnings <- c(warnings, "Random CV can overestimate SDM performance when records are spatially autocorrelated.")
+
     future_state <- "info"
     future_detail <- "Future climate projection is off."
     if (isTRUE(input$future_projection)) {
@@ -334,6 +349,8 @@ server <- function(input, output, session) {
         readiness_item("Selected covariates", paste(selected_count, "total covariates selected; BIO", paste(biovars, collapse = ", BIO")), if (selected_count >= 2) "ok" else "error"),
         readiness_item("Projection extent", extent_detail, extent_state),
         readiness_item("Observation/projection overlap", overlap_detail, overlap_state),
+        readiness_item("Thinning", thinning_detail, "info"),
+        readiness_item("Cross-validation", cv_detail, if (identical(cv_strategy, "random")) "warn" else "info"),
         readiness_item("Future climate projection", future_detail, future_state)
       )
     )
@@ -394,9 +411,12 @@ server <- function(input, output, session) {
             species = species_label, occurrence_file = occurrence_file, worldclim_dir = input$worldclim_dir,
             selected_biovars = as.integer(input$biovars), projection_extent = projection_extent,
             background_n = input$background_n, min_source_records = input$min_source_records,
-            merge_small_sources = TRUE, thin_by_cell = isTRUE(input$thin_by_cell), model_id = input$model_id,
+            merge_small_sources = TRUE, thin_by_cell = isTRUE(input$thin_by_cell),
+            thinning_mode = input$thinning_mode, thinning_distance_km = input$thinning_distance_km %||% sdm_default_thinning_distance_km,
+            model_id = input$model_id,
             include_quadratic = isTRUE(input$quadratic),
             threshold = input$threshold, aggregation_factor = input$aggregation_factor, cv_folds = as.integer(input$cv_folds),
+            cv_strategy = input$cv_strategy, cv_block_size_km = input$cv_block_size_km,
             n_cores = input$n_cores, allow_download = isTRUE(input$download_worldclim), worldclim_res = as.numeric(input$worldclim_res),
             use_elevation = isTRUE(input$use_elevation), elevation_demtype = input$elevation_demtype,
             opentopo_api_key = input$opentopo_api_key,
@@ -419,7 +439,7 @@ server <- function(input, output, session) {
   output$metric_cards <- renderUI({
     r <- rv$result
     if (is.null(r)) return(div(class = "metric-grid", metric_card("Observation records", "-", "waiting for run"), metric_card("Covariates", "-", "waiting for run"), metric_card("AUC", "-", "cross-validation"), metric_card("High-suitability area", "-", "km2 above threshold")))
-    div(class = "metric-grid", metric_card("Observation records used", fmt_num(r$metrics$presence_records), "after cleaning/thinning"), metric_card("Model", r$config$model_label %||% "GLM", "backend"), metric_card("CV AUC", fmt_num(r$metrics$auc_mean, 3), paste0(r$metrics$cv_folds, " folds; ", r$metrics$n_cores, " cores")), metric_card("High-suitability area", fmt_num(r$summary$high_risk_area_km2), "km2 above threshold"))
+    div(class = "metric-grid", metric_card("Observation records used", fmt_num(r$metrics$presence_records), "after cleaning/thinning"), metric_card("Model", r$config$model_label %||% "GLM", "backend"), metric_card("CV AUC", fmt_num(r$metrics$auc_mean, 3), paste0(r$metrics$cv_folds, " folds; ", r$metrics$cv_strategy %||% "random")), metric_card("CV TSS", fmt_num(r$metrics$tss_mean, 3), "thresholded skill"), metric_card("Sensitivity", fmt_num(r$metrics$sensitivity_mean, 3), "CV mean"), metric_card("High-suitability area", fmt_num(r$summary$high_risk_area_km2), "km2 above threshold"))
   })
 
   output$suitability_plot <- renderPlot({ if (is.null(rv$result)) return(placeholder_plot("No suitability map yet.")); r <- rv$result; plot_suitability_map(r$suitability, r$occurrence, r$config$projection_extent, r$config$species, r$config$threshold, TRUE) })
@@ -440,6 +460,8 @@ server <- function(input, output, session) {
       row("Observation source", r$config$occurrence_source),
       row("Observation file", r$config$occurrence_file),
       row("Covariates", paste(r$environment$names, collapse = ", ")),
+      row("Thinning", paste0(r$config$thinning_mode %||% "legacy", if (identical(r$config$thinning_mode, "distance")) paste0(" (", r$config$thinning_distance_km, " km)") else "")),
+      row("Cross-validation", paste0(r$metrics$cv_folds, " folds; ", r$metrics$cv_strategy %||% "random")),
       row("CPU cores used", r$metrics$n_cores),
       row("Elapsed time", paste(fmt_num(r$metrics$elapsed_seconds, 1), "sec")),
       row("Output TIFF", r$paths$tif),

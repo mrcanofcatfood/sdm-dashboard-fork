@@ -71,7 +71,7 @@ expand_release_paths <- function(include_paths, include_worldclim = FALSE) {
 source_release_paths <- function() {
   expand_release_paths(c(
     "app.R", "launch_app.R", "run_app_windows.bat",
-    "README.md", "README_WINDOWS.md", "install_packages.R", "pipeline.R",
+    "README.md", "README_WINDOWS.md", "BIOMOD2_ADAPTER_NOTES.md", "install_packages.R", "pipeline.R",
     "optimized_sdm.R", "SDM.Rproj", ".gitignore", ".dockerignore",
     "DESCRIPTION", "LICENSE", "CITATION.cff", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md",
     "Dockerfile", "docker-compose.yml", ".github", "R", "scripts", "data", "tests", "www"

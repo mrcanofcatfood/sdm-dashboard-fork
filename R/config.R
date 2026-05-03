@@ -16,6 +16,10 @@ sdm_default_min_source_records <- 15L
 sdm_default_threshold <- 0.5
 sdm_default_aggregation_factor <- 1L
 sdm_default_cv_folds <- 3L
+sdm_default_cv_strategy <- "random"
+sdm_default_cv_block_size_km <- NA_real_
+sdm_default_thinning_mode <- "auto"
+sdm_default_thinning_distance_km <- 10
 sdm_default_worldclim_res <- 10
 sdm_default_seed <- 42L
 sdm_default_model_id <- "glm"
