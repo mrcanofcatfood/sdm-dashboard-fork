@@ -1,4 +1,4 @@
-> ⚠️ **This repository has moved.** Active development continues at [mrcanofcatfood/sdm-dashboard](https://github.com/mrcanofcatfood/sdm-dashboard). This fork is archived and no longer maintained.
+> ⚠️ **This repository has moved.** Active development continues at [unstable-branch/sdm-dashboard](https://github.com/unstable-branch/sdm-dashboard). This fork is archived and no longer maintained.
 
 # SDM Dashboard Workbench
 
@@ -109,7 +109,7 @@ Most users should use the latest GitHub Release rather than cloning the reposito
 
 Latest beta release:
 
-- Repository: `https://github.com/mrcanofcatfood/sdm-dashboard`
+- Repository: `https://github.com/unstable-branch/sdm-dashboard`
 
 ## Local Run
 
