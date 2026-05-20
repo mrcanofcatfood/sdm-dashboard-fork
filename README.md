@@ -1,3 +1,5 @@
+> ⚠️ **This repository has moved.** Active development continues at [mrcanofcatfood/sdm-dashboard](https://github.com/mrcanofcatfood/sdm-dashboard). This fork is archived and no longer maintained.
+
 # SDM Dashboard Workbench
 
 SDM Dashboard Workbench is a local R/Shiny application for species distribution modelling from presence-only occurrence records. It provides a multi-algorithm, multi-species workbench with occurrence cleaning, climate/environmental covariates, model fitting, evaluation, future projection, and a rich ecology toolkit — all in one desktop-friendly workflow.
